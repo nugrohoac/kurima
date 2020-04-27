@@ -1,6 +1,9 @@
 package kurima
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 // ErrNotFound .
 var ErrNotFound = errors.New("not found")
@@ -19,3 +22,22 @@ var ErrBindStruct = errors.New("failed binding struct")
 
 // ErrValidateStruct .
 var ErrValidateStruct = errors.New("failed validate struct")
+
+// InternalError .
+type InternalError struct {
+	Path string
+}
+
+func (i InternalError) Error() string {
+	return fmt.Sprintf("internal server error at : %v", i.Path)
+}
+
+// SyntaxError .
+type SyntaxError struct {
+	Line int
+	Col  int
+}
+
+func (s SyntaxError) Error() string {
+	return fmt.Sprintf("%d:%d: syntax error", s.Line, s.Col)
+}
