@@ -1,13 +1,12 @@
 package middleware
 
 import (
-	"github.com/nac-project/kurima"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 
-
+	"github.com/nac-project/kurima"
 )
 
 func TestNewJWTHash(t *testing.T) {

@@ -2,19 +2,17 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/nac-project/kurima"
-	"github.com/nac-project/kurima/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/labstack/echo"
-
-
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/nac-project/kurima"
+	"github.com/nac-project/kurima/mocks"
 )
 
 func TestMiddleware(t *testing.T) {

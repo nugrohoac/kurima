@@ -5,11 +5,10 @@ import (
 	"encoding/hex"
 	"hash"
 
-	"github.com/nac-project/kurima"
-
+	"github.com/pkg/errors"
 	"gopkg.in/go-playground/validator.v9"
 
-	"github.com/pkg/errors"
+	"github.com/nac-project/kurima"
 )
 
 type service struct {

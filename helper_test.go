@@ -5,9 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/dgrijalva/jwt-go"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetGetClaimOnContext(t *testing.T) {

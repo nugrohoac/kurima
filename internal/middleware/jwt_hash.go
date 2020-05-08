@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"github.com/nac-project/kurima"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-
 	"github.com/pkg/errors"
+
+	"github.com/nac-project/kurima"
 )
 
 type jwtToken struct {

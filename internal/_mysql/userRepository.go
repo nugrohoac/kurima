@@ -3,16 +3,15 @@ package _mysql
 import (
 	"context"
 	"database/sql"
-	"github.com/nac-project/kurima"
 	"strings"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
-
 	sq "github.com/Masterminds/squirrel"
-
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
+
+	"github.com/nac-project/kurima"
 )
 
 type repository struct {

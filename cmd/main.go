@@ -3,24 +3,22 @@ package main
 import (
 	"crypto/sha512"
 	"database/sql"
-	"github.com/nac-project/kurima/internal/_http"
-	"github.com/nac-project/kurima/internal/_mysql"
-	"github.com/nac-project/kurima/user"
 	"log"
-	http2 "net/http"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo"
-
-
-	"github.com/sirupsen/logrus"
-	"gopkg.in/go-playground/validator.v9"
-
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/labstack/echo"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/go-playground/validator.v9"
+
+	"github.com/nac-project/kurima/internal/_http"
+	"github.com/nac-project/kurima/internal/_mysql"
+	"github.com/nac-project/kurima/user"
 )
 
 func main() {
@@ -59,7 +57,7 @@ func main() {
 	}
 
 	e.GET("/ping", func(c echo.Context) error {
-		return c.String(http2.StatusOK, "pong")
+		return c.String(http.StatusOK, "pong")
 	})
 
 	//_http.NewUserDelivery(e, userService, time.Duration(timeOutInt)*time.Second, *validator.New())
