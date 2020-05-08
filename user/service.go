@@ -3,12 +3,11 @@ package user
 import (
 	"context"
 	"encoding/hex"
-	"github.com/nac-project/kurima"
 	"hash"
 
+	"github.com/nac-project/kurima"
+
 	"gopkg.in/go-playground/validator.v9"
-
-
 
 	"github.com/pkg/errors"
 )
@@ -24,7 +23,11 @@ type service struct {
 // Register .
 func (s service) Register(ctx context.Context, user kurima.User) (kurima.User, error) {
 	currentUser, err := s.userRepo.GetByEmail(ctx, user.Email)
-	if err != nil && err != kurima.ErrNotFound {
+	if err != nil {
+		if err != kurima.ErrNotFound {
+			return kurima.User{}, errors.Wrap(kurima.ErrNotFound, "error user not found")
+		}
+
 		return kurima.User{}, errors.Wrap(err, "error get user by email")
 	}
 
