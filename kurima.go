@@ -23,3 +23,9 @@ type JWTHash interface {
 	Encode(user User) (string, error)
 	Decode(tokenString string, claim *Claim) (bool, error)
 }
+
+// BcryptHash is interface to handle salt using bcrypt hash
+type BcryptHash interface {
+	Generate(password string) (string, error)
+	Compare(hashedPassword, password string) error
+}

@@ -41,3 +41,12 @@ type SyntaxError struct {
 func (s SyntaxError) Error() string {
 	return fmt.Sprintf("%d:%d: syntax error", s.Line, s.Col)
 }
+
+// ErrorAuth is used to return error auth
+type ErrorAuth struct {
+	Message string
+}
+
+func (ea ErrorAuth) Error() string {
+	return ea.Message
+}
