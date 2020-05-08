@@ -1,17 +1,17 @@
-package middleware_test
+package authenticate_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/nac-project/kurima/internal/middleware"
+	"github.com/nac-project/kurima/internal/authenticate"
 )
 
 func TestNewBcryptHash(t *testing.T) {
 	password := "this is example password"
 
-	bcryptHash := middleware.NewBcryptHash().
+	bcryptHash := authenticate.NewBcryptHash().
 		WithStartEnd("salt start").
 		WithStartEnd("salt end").
 		Build()

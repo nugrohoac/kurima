@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/labstack/echo"
 	"gopkg.in/go-playground/validator.v9"
 
@@ -25,17 +27,17 @@ func (d delivery) Register(c echo.Context) error {
 	var user kurima.User
 	err := c.Bind(&user)
 	if err != nil {
-		return kurima.ErrBindStruct
+		return errors.Wrap(kurima.ErrBindStruct{Message: err.Error()}, "error binding struct")
 	}
 
 	err = d.validate(user)
 	if err != nil {
-		return kurima.ErrValidateStruct
+		return errors.Wrap(kurima.ErrValidateStruct{Message: err.Error()}, "error validate struct")
 	}
 
 	user, err = d.userService.Register(ctx, user)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error register user")
 	}
 
 	return c.JSON(http.StatusCreated, user)
@@ -49,12 +51,12 @@ func (d delivery) Login(c echo.Context) error {
 	var user kurima.User
 	err := c.Bind(&user)
 	if err != nil {
-		return kurima.ErrBindStruct
+		return errors.Wrap(kurima.ErrBindStruct{Message: err.Error()}, "error binding struct")
 	}
 
 	user, err = d.userService.Login(ctx, user)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error login")
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -68,13 +70,13 @@ func (d delivery) UpdatePassword(c echo.Context) error {
 	var user kurima.User
 	err := c.Bind(&user)
 	if err != nil {
-		return kurima.ErrBindStruct
+		return errors.Wrap(kurima.ErrBindStruct{Message: err.Error()}, "error binding struct")
 	}
 
 	ID := c.Param("id")
 	user, err = d.userService.UpdatePassword(ctx, ID, user)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error update password user")
 	}
 
 	return c.JSON(http.StatusOK, user)

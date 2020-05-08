@@ -2,8 +2,6 @@ package user
 
 import (
 	"context"
-	"encoding/hex"
-	"hash"
 
 	"github.com/pkg/errors"
 	"gopkg.in/go-playground/validator.v9"
@@ -12,29 +10,27 @@ import (
 )
 
 type service struct {
-	userRepo  kurima.UserRepository
-	saltStart string
-	saltEnd   string
-	sha521    hash.Hash
-	validator validator.Validate
+	validator  validator.Validate
+	userRepo   kurima.UserRepository
+	bcryptHash kurima.BcryptHash
 }
 
 // Register .
 func (s service) Register(ctx context.Context, user kurima.User) (kurima.User, error) {
 	currentUser, err := s.userRepo.GetByEmail(ctx, user.Email)
 	if err != nil {
-		if err != kurima.ErrNotFound {
-			return kurima.User{}, errors.Wrap(kurima.ErrNotFound, "error user not found")
-		}
-
 		return kurima.User{}, errors.Wrap(err, "error get user by email")
 	}
 
 	if currentUser.Email == user.Email {
-		return kurima.User{}, errors.Wrap(kurima.ErrDuplicatedUser, "user already exist")
+		return kurima.User{}, errors.Wrap(kurima.ErrDuplicated{Message: "user already exist"}, "user already exist")
 	}
 
-	user.Password = s.encryptSHA512(user.Password)
+	user.Password, err = s.bcryptHash.Generate(user.Password)
+	if err != nil {
+		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: err.Error()}, "error generating password")
+	}
+
 	userRegistered, err := s.userRepo.Register(ctx, user)
 
 	if err != nil {
@@ -47,7 +43,14 @@ func (s service) Register(ctx context.Context, user kurima.User) (kurima.User, e
 
 // Login .
 func (s service) Login(ctx context.Context, user kurima.User) (kurima.User, error) {
-	user.Password = s.encryptSHA512(user.Password)
+	passwordHashed, err := s.bcryptHash.Generate(user.Password)
+	if err != nil {
+		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: err.Error()}, "error generating password")
+	}
+
+	if err = s.bcryptHash.Compare(passwordHashed, user.Password); err != nil {
+		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: err.Error()}, "error comparing hashed with password")
+	}
 
 	userLogin, err := s.userRepo.GetByEmail(ctx, user.Email)
 	if err != nil {
@@ -55,7 +58,7 @@ func (s service) Login(ctx context.Context, user kurima.User) (kurima.User, erro
 	}
 
 	if user.Password != userLogin.Password {
-		return kurima.User{}, errors.Wrap(kurima.ErrorWrongPassword, "wrong password")
+		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: "password is wrong"}, "password is wrong")
 	}
 
 	userLogin.Password = ""
@@ -71,7 +74,7 @@ func (s service) UpdatePassword(ctx context.Context, ID string, user kurima.User
 	}
 
 	if currentUser.Email != user.Email {
-		return kurima.User{}, errors.Wrap(kurima.ErrInValidUser, "user is invalid")
+		return kurima.User{}, errors.Wrap(kurima.ErrInValid{Message: "email is different"}, "user is invalid")
 	}
 
 	_, err = s.userRepo.UpdatePassword(ctx, ID, user)
@@ -82,17 +85,6 @@ func (s service) UpdatePassword(ctx context.Context, ID string, user kurima.User
 	currentUser.Password = ""
 
 	return currentUser, nil
-}
-
-func (s service) encryptSHA512(str string) string {
-	str = s.saltStart + str + s.saltEnd
-	s.sha521.Write([]byte(str))
-	defer s.sha521.Reset()
-
-	byteHash := s.sha521.Sum(nil)
-	stringHash := hex.EncodeToString(byteHash)
-
-	return stringHash
 }
 
 // Initiator as a type for constructor
@@ -106,26 +98,10 @@ func (i Initiator) WithUserRepository(userRepo kurima.UserRepository) Initiator 
 	}
 }
 
-// WithSha521 is used to included WithSha521
-func (i Initiator) WithSha521(sha521 hash.Hash) Initiator {
+// WithBcryptHash is used to included BcryptHash
+func (i Initiator) WithBcryptHash(bcryptHash kurima.BcryptHash) Initiator {
 	return func(s *service) *service {
-		i(s).sha521 = sha521
-		return s
-	}
-}
-
-// WithSaltStart is used to included salt
-func (i Initiator) WithSaltStart(saltStart string) Initiator {
-	return func(s *service) *service {
-		i(s).saltStart = saltStart
-		return s
-	}
-}
-
-// WithSaltEnd is used to included salt
-func (i Initiator) WithSaltEnd(saltEnd string) Initiator {
-	return func(s *service) *service {
-		i(s).saltEnd = saltEnd
+		i(s).bcryptHash = bcryptHash
 		return s
 	}
 }

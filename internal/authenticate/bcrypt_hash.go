@@ -1,4 +1,4 @@
-package middleware
+package authenticate
 
 import (
 	"github.com/nac-project/kurima"
@@ -23,27 +23,27 @@ func (b bcryptHash) Generate(password string) (string, error) {
 }
 
 // Compare use to check valid hash with original string
-func (b bcryptHash) Compare(hashedPassword, password string) error {
+func (b bcryptHash) Compare(passwordHashed, password string) error {
 	password = b.saltStart + password + b.saltEnd
 	passwordBytes := []byte(password)
-	hashedPasswordBytes := []byte(hashedPassword)
+	passwordHashedBytes := []byte(passwordHashed)
 
-	return bcrypt.CompareHashAndPassword(hashedPasswordBytes, passwordBytes)
+	return bcrypt.CompareHashAndPassword(passwordHashedBytes, passwordBytes)
 }
 
 // Initiator as a type for constructor
 type Initiator func(s *bcryptHash) *bcryptHash
 
-// WithStartSalt .
-func (i Initiator) WithStartSalt(saltStart string) Initiator {
+// WithSaltStart .
+func (i Initiator) WithSaltStart(saltStart string) Initiator {
 	return func(s *bcryptHash) *bcryptHash {
 		i(s).saltStart = saltStart
 		return s
 	}
 }
 
-// WithStartEnd .
-func (i Initiator) WithStartEnd(saltEnd string) Initiator {
+// WithSaltEnd .
+func (i Initiator) WithSaltEnd(saltEnd string) Initiator {
 	return func(s *bcryptHash) *bcryptHash {
 		i(s).saltEnd = saltEnd
 		return s

@@ -48,7 +48,7 @@ func (r repository) GetByEmail(ctx context.Context, email string) (kurima.User, 
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return kurima.User{}, kurima.ErrNotFound
+			return kurima.User{}, errors.Wrap(kurima.ErrNotFound{Message: err.Error()}, "user is not found")
 		}
 
 		return kurima.User{}, errors.Wrap(err, "error scan user")
@@ -66,7 +66,7 @@ func (r repository) Register(ctx context.Context, user kurima.User) (kurima.User
 		return kurima.User{}, errors.Wrap(err, "error create transaction db")
 	}
 
-	user.Role = append(user.Role, kurima.DefaultRole)
+	user.Role = append(user.Role, kurima.RoleDefault)
 	roles := strings.Join(user.Role, ",")
 	timeNow := time.Now().UTC()
 	user.ID = uuid.NewV4().String()
@@ -91,8 +91,8 @@ func (r repository) Register(ctx context.Context, user kurima.User) (kurima.User
 		user.Status,
 		timeNow,
 		timeNow,
-		kurima.Admin,
-		kurima.Admin,
+		kurima.RoleAdmin,
+		kurima.RoleAdmin,
 	).ToSql()
 
 	if err != nil {
@@ -146,7 +146,7 @@ func (r repository) Login(ctx context.Context, user kurima.User) (kurima.User, e
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return kurima.User{}, kurima.ErrNotFound
+			return kurima.User{}, errors.Wrap(kurima.ErrNotFound{Message: "user is not found"}, "user is not found")
 		}
 
 		return kurima.User{}, errors.Wrap(err, "error scan user")
@@ -181,9 +181,18 @@ func (r repository) UpdatePassword(ctx context.Context, ID string, user kurima.U
 		return kurima.User{}, errors.Wrap(err, "error convert builder to sql")
 	}
 
-	_, err = tx.ExecContext(ctx, query, args...)
+	result, err := tx.ExecContext(ctx, query, args...)
 	if err != nil {
 		return kurima.User{}, errors.Wrap(err, "error execute query sql")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+
+	}
+
+	if rowsAffected == 0 {
+		return kurima.User{}, nil
 	}
 
 	if errCommit := tx.Commit(); errCommit != nil {
@@ -229,7 +238,7 @@ func (r repository) GetByID(ctx context.Context, ID string) (kurima.User, error)
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return kurima.User{}, kurima.ErrNotFound
+			return kurima.User{}, errors.Wrap(kurima.ErrNotFound{Message: "user is not found"}, "user is not found")
 		}
 
 		return kurima.User{}, errors.Wrap(err, "error scan user")

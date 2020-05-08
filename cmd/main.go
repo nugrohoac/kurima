@@ -1,13 +1,14 @@
 package main
 
 import (
-	"crypto/sha512"
 	"database/sql"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/nac-project/kurima/internal/authenticate"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -39,11 +40,14 @@ func main() {
 
 	userRepository := _mysql.NewUserRepository(mysqlDB)
 
-	userService := user.NewUserService().
-		WithUserRepository(userRepository).
-		WithSha521(sha512.New()).
+	bcryptHash := authenticate.NewBcryptHash().
 		WithSaltStart(os.Getenv("START_SALT")).
 		WithSaltEnd(os.Getenv("END_SALT")).
+		Build()
+
+	userService := user.NewUserService().
+		WithUserRepository(userRepository).
+		WithBcryptHash(bcryptHash).
 		Build()
 
 	e := echo.New()

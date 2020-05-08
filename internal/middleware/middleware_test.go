@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nac-project/kurima/internal/authenticate"
+
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -28,7 +30,7 @@ func TestMiddleware(t *testing.T) {
 			Return(user, nil).
 			Once()
 
-		jwtHash := NewJWTHash([]byte("secret key"), time.Duration(1)*time.Hour)
+		jwtHash := authenticate.NewJWTHash([]byte("secret key"), time.Duration(1)*time.Hour)
 		tokenJwt, err := jwtHash.Encode(user)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, tokenJwt)

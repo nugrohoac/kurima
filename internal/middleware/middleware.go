@@ -35,7 +35,7 @@ func (m Middleware) Auth(handler echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		if !valid {
-			return kurima.ErrInValidUser
+			return _errors.Wrap(kurima.ErrorAuth{Message: "failed validating token"}, "failed validating jwt token")
 		}
 
 		if time.Unix(claim.ExpiresAt, 0).Sub(time.Now()) < 30*time.Second {
@@ -65,24 +65,18 @@ func (m Middleware) ErrHandler(handler echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		err := handler(c)
 		if err != nil {
-			errCause := _errors.Cause(err)
-			switch errCause {
-			// http status 400
-			case kurima.ErrDuplicatedUser:
+			switch errCause := _errors.Cause(err).(type) {
+			case kurima.ErrDuplicated: // error code 400
 				return c.JSON(http.StatusBadRequest, errCause)
 			case kurima.ErrBindStruct:
 				return c.JSON(http.StatusBadRequest, errCause)
-			case kurima.ErrValidateStruct:
-				return c.JSON(http.StatusBadRequest, errCause)
-			case kurima.ErrorWrongPassword:
-				// http status 401
-				return c.JSON(http.StatusUnauthorized, kurima.ErrorWrongPassword)
-			case kurima.ErrInValidUser:
-				return c.JSON(http.StatusUnauthorized, kurima.ErrorWrongPassword)
-			case kurima.ErrNotFound:
-				return c.JSON(http.StatusNotFound, kurima.ErrNotFound)
-			default:
-				// http status 500
+			case kurima.ErrorAuth: // error code 401
+				return c.JSON(http.StatusUnauthorized, errCause)
+			case kurima.ErrInValid:
+				return c.JSON(http.StatusUnauthorized, errCause)
+			case kurima.ErrNotFound: // error code 404
+				return c.JSON(http.StatusNotFound, errCause)
+			default: // default 500
 				return c.JSON(http.StatusInternalServerError, errCause)
 			}
 		}

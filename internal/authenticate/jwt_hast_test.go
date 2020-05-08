@@ -1,8 +1,10 @@
-package middleware
+package authenticate_test
 
 import (
 	"testing"
 	"time"
+
+	"github.com/nac-project/kurima/internal/authenticate"
 
 	"github.com/stretchr/testify/require"
 
@@ -14,7 +16,7 @@ func TestNewJWTHash(t *testing.T) {
 		secretKey := []byte("this is secret key")
 		duration := time.Duration(1) * time.Hour
 
-		jwtHash := NewJWTHash(secretKey, duration)
+		jwtHash := authenticate.NewJWTHash(secretKey, duration)
 		user := kurima.User{
 			Email:  "nugrohoac96@gmail.com",
 			Role:   []string{kurima.DefaultRole},

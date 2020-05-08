@@ -1,27 +1,53 @@
 package kurima
 
 import (
-	"errors"
 	"fmt"
 )
 
 // ErrNotFound .
-var ErrNotFound = errors.New("not found")
+type ErrNotFound struct {
+	Message string
+}
 
-// ErrorWrongPassword .
-var ErrorWrongPassword = errors.New("wrong password")
+func (enf ErrNotFound) Error() string {
+	return enf.Message
+}
 
-// ErrInValidUser .
-var ErrInValidUser = errors.New("user is not valid")
+// ErrInValid .
+type ErrInValid struct {
+	Message string
+}
 
-// ErrDuplicatedUser .
-var ErrDuplicatedUser = errors.New("user is exist")
+func (ei ErrInValid) Error() string {
+	return ei.Message
+}
+
+// ErrDuplicated .
+type ErrDuplicated struct {
+	Message string
+}
+
+func (ed ErrDuplicated) Error() string {
+	return ed.Message
+}
 
 // ErrBindStruct .
-var ErrBindStruct = errors.New("failed binding struct")
+type ErrBindStruct struct {
+	Message string
+}
+
+func (ebs ErrBindStruct) Error() string {
+	return ebs.Message
+}
 
 // ErrValidateStruct .
-var ErrValidateStruct = errors.New("failed validate struct")
+type ErrValidateStruct struct {
+	Message string
+}
+
+func (evs ErrValidateStruct) Error() string {
+	return evs.Message
+}
 
 // InternalError .
 type InternalError struct {
