@@ -2,7 +2,7 @@ package kurima
 
 const (
 	// RoleDefault .
-	RoleDefault = "attender"
+	RoleDefault = "user"
 	// RoleAdmin .
 	RoleAdmin = "admin"
 	// StatusInactive .

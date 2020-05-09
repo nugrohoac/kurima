@@ -19,7 +19,11 @@ type service struct {
 func (s service) Register(ctx context.Context, user kurima.User) (kurima.User, error) {
 	currentUser, err := s.userRepo.GetByEmail(ctx, user.Email)
 	if err != nil {
-		return kurima.User{}, errors.Wrap(err, "error get user by email")
+		switch errors.Cause(err).(type) {
+		case kurima.ErrNotFound:
+		default:
+			return kurima.User{}, errors.Wrap(err, "error get user by email")
+		}
 	}
 
 	if currentUser.Email == user.Email {
@@ -31,6 +35,8 @@ func (s service) Register(ctx context.Context, user kurima.User) (kurima.User, e
 		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: err.Error()}, "error generating password")
 	}
 
+	user.Role = append(user.Role, kurima.RoleDefault)
+	user.Status = kurima.StatusInactive
 	userRegistered, err := s.userRepo.Register(ctx, user)
 
 	if err != nil {
@@ -43,22 +49,13 @@ func (s service) Register(ctx context.Context, user kurima.User) (kurima.User, e
 
 // Login .
 func (s service) Login(ctx context.Context, user kurima.User) (kurima.User, error) {
-	passwordHashed, err := s.bcryptHash.Generate(user.Password)
-	if err != nil {
-		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: err.Error()}, "error generating password")
-	}
-
-	if err = s.bcryptHash.Compare(passwordHashed, user.Password); err != nil {
-		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: err.Error()}, "error comparing hashed with password")
-	}
-
 	userLogin, err := s.userRepo.GetByEmail(ctx, user.Email)
 	if err != nil {
 		return kurima.User{}, errors.Wrap(err, "error login")
 	}
 
-	if user.Password != userLogin.Password {
-		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: "password is wrong"}, "password is wrong")
+	if err = s.bcryptHash.Compare(userLogin.Password, user.Password); err != nil {
+		return kurima.User{}, errors.Wrap(kurima.ErrorAuth{Message: err.Error()}, "error comparing hashed with password")
 	}
 
 	userLogin.Password = ""

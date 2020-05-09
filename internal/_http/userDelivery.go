@@ -113,4 +113,5 @@ func NewUserDelivery(e *echo.Echo, userService kurima.UserService, timeOut time.
 	}
 
 	e.POST("/user/login", d.Login)
+	e.POST("/user/register", d.Register)
 }

@@ -66,11 +66,9 @@ func (r repository) Register(ctx context.Context, user kurima.User) (kurima.User
 		return kurima.User{}, errors.Wrap(err, "error create transaction db")
 	}
 
-	user.Role = append(user.Role, kurima.RoleDefault)
 	roles := strings.Join(user.Role, ",")
 	timeNow := time.Now().UTC()
 	user.ID = uuid.NewV4().String()
-	user.Status = kurima.StatusInactive
 
 	query, args, err := sq.Insert("user").
 		Columns(
@@ -188,11 +186,11 @@ func (r repository) UpdatePassword(ctx context.Context, ID string, user kurima.U
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-
+		return kurima.User{}, errors.Wrap(kurima.ErrNoRowAffected{Message: err.Error()}, "error check row affected")
 	}
 
 	if rowsAffected == 0 {
-		return kurima.User{}, nil
+		return kurima.User{}, errors.Wrap(kurima.ErrNoRowAffected{Message: err.Error()}, "error row affected is zero")
 	}
 
 	if errCommit := tx.Commit(); errCommit != nil {

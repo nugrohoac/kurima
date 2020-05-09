@@ -51,7 +51,7 @@ func main() {
 		Build()
 
 	e := echo.New()
-	group := e.Group("")
+	//group := e.Group("")
 
 	timeOutString := os.Getenv("TIMEOUT")
 	timeOutInt, err := strconv.Atoi(timeOutString)
@@ -64,9 +64,9 @@ func main() {
 		return c.String(http.StatusOK, "pong")
 	})
 
-	//_http.NewUserDelivery(e, userService, time.Duration(timeOutInt)*time.Second, *validator.New())
+	_http.NewUserDelivery(e, userService, time.Duration(timeOutInt)*time.Second, *validator.New())
 
-	_http.NewUserDeliveryWithAuth(group, userService, time.Duration(timeOutInt)*time.Second, *validator.New())
+	//_http.NewUserDeliveryWithAuth(group, userService, time.Duration(timeOutInt)*time.Second, *validator.New())
 
 	e.Logger.Fatal(e.Start(":3000"))
 }

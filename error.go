@@ -76,3 +76,12 @@ type ErrorAuth struct {
 func (ea ErrorAuth) Error() string {
 	return ea.Message
 }
+
+// ErrNoRowAffected .
+type ErrNoRowAffected struct {
+	Message string
+}
+
+func (enr ErrNoRowAffected) Error() string {
+	return enr.Message
+}
